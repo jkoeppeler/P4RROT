@@ -1,7 +1,8 @@
 #! /bin/bash
 
-cp -r ../../../templates/p4_psa_ebpf_template/* ./test.p4app
 
+mkdir -p ./test.p4app
+cp -r ../../../templates/p4_psa_ebpf_template.p4app/* ./test.p4app
 python3 codegen.py
 
 p4c-ebpf --arch psa -o main.c ./test.p4app/main.p4
