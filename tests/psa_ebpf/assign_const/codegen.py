@@ -8,7 +8,7 @@ from p4rrot.core.commands import *
 
 UID.reset()
 fp = FlowProcessor(
-        istruct = [],
+        istruct = [('msg_in',uint8_t)],
         ostruct = [('uint64', uint64_t),('uint32',uint32_t), ('uint16', uint16_t), ('uint8', uint8_t)]
     )
 
@@ -16,10 +16,10 @@ fp = FlowProcessor(
 
 (
 fp
-.add(AssignConst('uint64',1122))
-.add(AssignConst('uint32',3344))
-.add(AssignConst('uint16',66))
-.add(AssignConst('uint8',77))
+.add(AssignConst('uint64',0x4141414142424242))
+.add(AssignConst('uint32',0x45454545))
+.add(AssignConst('uint16',0x4646))
+.add(AssignConst('uint8',0x47))
 .add(SendBack())
 )  
 
