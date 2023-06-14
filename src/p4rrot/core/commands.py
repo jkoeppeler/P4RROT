@@ -51,6 +51,11 @@ class Touch(Command):
 
 
 class AssignConst(Command):
+    """
+        Assign a constant value to a variable.
+        Usage: 
+        AssignConst('var_name', contant_value)
+    """
     
     def __init__(self,vname,value,env=None):
         self.vname = vname
@@ -78,6 +83,11 @@ class AssignConst(Command):
 
 
 class Increment(Command):
+    """
+        Increments a variable by a contant value.
+        Usage: 
+        Increment('var_name', constant_value))
+    """
     
     def __init__(self,vname,value:int,env=None):
         self.vname = vname
