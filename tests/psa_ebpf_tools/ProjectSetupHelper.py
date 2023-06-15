@@ -151,9 +151,9 @@ class ProjectSetupHelper:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("cmd", choices=["setup", "load_template", "clean", "shutdown"])
+    parser.add_argument("cmd", choices=["setup", "load_template", "clean"])
     parser.add_argument("--template_path", "-tp", required=False, type=str)
-    parser.add_argument("--build_dir", "-bd", default="./test.p4app")
+    parser.add_argument("--build_dir", "-bd", default="./template")
     parser.add_argument("--env_file", "-ef", default="network-config.env")
     args = parser.parse_args()
 
