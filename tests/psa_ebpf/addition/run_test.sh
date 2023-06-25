@@ -3,8 +3,6 @@ TARGET_DIR="./template"
 
 cp -r ../../../templates/p4_psa_ebpf_template/* ${TARGET_DIR}
 
-mkdir -p ./template
-cp -r ../../../templates/p4_psa_ebpf_template/* ./template
 python3 codegen.py
 
 p4c-ebpf --arch psa -o main.c $TARGET_DIR/main.p4
