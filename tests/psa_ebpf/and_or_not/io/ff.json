@@ -1,0 +1,8 @@
+//format (everything ecoded as T: true, F: false):
+//in: <op_a><op_b>
+//out: <res_and><res_or><res_not>
+//res_not is the invert of op_a
+{
+  "in": "FF",
+  "out": "FFT"
+}
