@@ -47,7 +47,7 @@ class ProjectSetupHelper:
         self.server_process: Optional[subprocess.Popen[bytes]] = None
         self.client_process: Optional[subprocess.Popen[bytes]] = None
 
-    
+
     def log_process_failure(self, res: subprocess.CompletedProcess):
         self.logger.warning(f"The infrastructure setup script failed... (ret_code: {res.returncode})")
         self.logger.warning("output:")
@@ -132,7 +132,7 @@ class ProjectSetupHelper:
 
         i = io["input"]
 
-        o = io["output"] 
+        o = io["output"]
 
         # self.logger.info(io)
         # self.logger.info(i)
@@ -161,10 +161,10 @@ class ProjectSetupHelper:
                 self.client_process.kill()
                 outs, errs = self.client_process.communicate()
 
-            try: 
+            try:
                 assert outputs[i].encode('utf-8') ==outs
             except AssertionError:
-                self.logger.error(f"Expected {outputs[0].encode('utf-8')}")
+                self.logger.error(f"Expected {outputs[i].encode('utf-8')}")
                 self.logger.error(f"Got {outs}")
                 raise
 
