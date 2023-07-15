@@ -34,6 +34,9 @@ struct metadata {
 
     bit<32> parsed_bytes;
     bit<32> truncated_to;
+    #ifdef DIGEST
+    #include "a_metadata.p4"
+    #endif
 }
 
 struct empty_t {}
@@ -203,6 +206,9 @@ control ebpfIngressDeparser(packet_out pkt,
                             in         psa_ingress_output_metadata_t istd) {
     
     InternetChecksum() ck;
+    #ifdef DIGEST
+    #include "a_deparser_declaration.p4"
+    #endif
 
     apply {
         if (hdr.ipv4.isValid()) {
@@ -226,6 +232,9 @@ control ebpfIngressDeparser(packet_out pkt,
 
 
         pkt.emit(hdr);
+        #ifdef DIGEST
+        #include "a_deparser_apply.p4"
+        #endif
     }
 }
 

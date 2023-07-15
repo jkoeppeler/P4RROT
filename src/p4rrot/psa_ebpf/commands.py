@@ -96,3 +96,43 @@ class GetTimestamp(Command):
     
     def execute(self, test_env):
         pass
+
+
+class Digest(Command):
+    def __init__(self, values, keys, env=None):
+        self.values=values
+        self.keys=keys
+        self.env = env
+
+
+    def check(self):
+        pass
+
+
+    def get_generated_code(self):
+        self.values = [(self.env.get_varinfo(value)["handle"], self.env.get_varinfo(value)["type"]) for value in self.values]
+        gc = GeneratedCode()
+        names = [
+            (name.split(".")[-1] + "_" + str(UID.get()), given_type)
+            for name, given_type, in self.values
+        ]
+        self.digest_name, digest_code = gen_struct(names, "generated_digest")
+        self.digest_metadata_name = f"digest_matadata_{UID.get()}"
+        self.digest_instance_name = "Instance_"+self.digest_name
+        print(self.digest_name)
+        gc.get_or_create("deparser_declaration").writeln(
+            "Digest<{}>() {};".format(self.digest_name, self.digest_instance_name)
+        )
+        gc.get_headers().write(digest_code)
+        gc.get_headers().write('#define DIGEST')
+        gc.get_or_create("metadata").writeln(f"{self.digest_name} {self.digest_metadata_name};")
+        gc.get_or_create("metadata").writeln(f"bool digest;")
+        gc.get_or_create("deparser_apply").writeln("if (meta.digest) {")
+        gc.get_or_create("deparser_apply").writeln(
+            "{}.pack(meta.{});".format(self.digest_instance_name, self.digest_metadata_name)
+        )
+        gc.get_or_create("deparser_apply").writeln("}")
+
+
+
+        return gc
