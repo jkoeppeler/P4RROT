@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 from p4rrot.standard_fields import *
 from p4rrot.generator_tools import *
 from p4rrot.checks import *
+from p4rrot.core.commands import *  
 import random
 
 class AssignRandomValue(Command):
@@ -99,10 +100,20 @@ class GetTimestamp(Command):
 
 
 class Digest(Command):
-    def __init__(self, values, keys, env=None):
+    def __init__(self, values, keys, table_name=None,action_name=None, env=None):
         self.values=values
         self.keys=keys
         self.env = env
+        if table_name is None:
+            self.table_name = "set_digest_or_drop_table_" + UID.get()
+        else:
+            self.table_name=table_name
+
+        if action_name is None:
+            self.action_name = "setter_action_" + UID.get()
+        else:
+            self.action_name = action_name
+
 
 
     def check(self):
@@ -132,6 +143,42 @@ class Digest(Command):
             "{}.pack(meta.{});".format(self.digest_instance_name, self.digest_metadata_name)
         )
         gc.get_or_create("deparser_apply").writeln("}")
+
+        table_name = self.table_name
+        setter_action= self.action_name 
+
+        decl = gc.get_decl()
+        decl.writeln(f"action {setter_action}() {{")
+        decl.increase_indent()
+        decl.writeln("meta.digest = true;")
+        decl.decrease_indent()
+        decl.writeln("}")
+
+
+        apply = gc.get_apply()
+        match = []
+        for key in self.keys:
+            match.append(self.env.get_varinfo(key))
+        actions = [setter_action, "drop"]
+        try:
+            key = [
+                {"name": part_key["handle"], "match_type": "exact"} for part_key in match
+            ]
+        except TypeError:
+            key = [
+                {"name": part_key.get_handle(), "match_type": "exact"} for part_key in match
+            ]
+        size = 1
+        const_entries = []
+        default_action = "drop"
+        eval_table = Table(
+            table_name, actions, key, size, const_entries, default_action
+        )
+        gc.concat(eval_table.get_generated_code())
+        apply.writeln("{}.apply();".format(table_name))
+
+
+
 
 
 
