@@ -122,6 +122,7 @@ class Digest(Command):
 
     def get_generated_code(self):
         self.values = [(self.env.get_varinfo(value)["handle"], self.env.get_varinfo(value)["type"]) for value in self.values]
+        print(self.values)
         gc = GeneratedCode()
         names = [
             (name.split(".")[-1] + "_" + str(UID.get()), given_type)
@@ -151,6 +152,8 @@ class Digest(Command):
         decl.writeln(f"action {setter_action}() {{")
         decl.increase_indent()
         decl.writeln("meta.digest = true;")
+        for i in range(len(self.values)):
+            decl.writeln(f"meta.{self.digest_metadata_name}.{names[i][0]} = {self.values[i][0]};")
         decl.decrease_indent()
         decl.writeln("}")
 
