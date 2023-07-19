@@ -35,3 +35,33 @@ Read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
 ## Discalimer
 
 The library is released under MIT license but please note that some of the tests, examples and templates might have different licensing.
+
+
+## Automated Tests
+The repository currently includes a docker-compose, which can be used to easily setup a working development/testing environment for P4RROT.
+To build and start the container use
+```bash
+docker compose run --rm p4rrot_dev  
+```
+The initial build process might take a few minutes. After it completes, you will be presented with the command line prompt inside a priviledged environment with your working directory mounted under `/nikss`.
+> **Warning**
+> The docker container runs with privileges and mounts the working directory. Be sure to backup any important data in this directory before starting the development process. 
+
+The [pytest](https://docs.pytest.org/) based test scripts can be found inside the `/test` directory.
+Running all tests in the directory can be achieved with
+```bash
+pytest . 
+```
+If you want to see additional logging messages, add `-log-cli-level=INFO`. 
+
+You can also execute only a specific test file
+```bash
+pytest test_simulation.py
+```
+or even a specific test case
+```bash
+pytest test_simulation.py::test_assign_const
+```
+
+
+
