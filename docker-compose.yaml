@@ -5,5 +5,14 @@ services:
     build: .
     privileged: true # needed to set new routes
     volumes:
-      - ./:/nikss
+      - ./examples:/nikss/examples
+      - ./src:/nikss/src
+      - ./templates:/nikss/templates
+      - ./test_builds:/nikss/test_builds
+      - ./tests:/nikss/tests
+      - ./tofino_test_builds:/nikss/tofino_test_builds
+      - ./pyproject.toml:/nikss/pyproject.toml
+      - ./requirements_dev.txt:/nikss/requirements_dev.txt
+      - ./setup.cfg:/nikss/setup.cfg
+      - ./tox.ini:/nikss/tox.ini
     stdin_open: true # docker run -i
