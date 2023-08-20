@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 from p4rrot.standard_fields import *
 from p4rrot.generator_tools import *
 from p4rrot.checks import *
+from p4rrot.core.commands import *  
 import random
 
 class AssignRandomValue(Command):
@@ -96,3 +97,91 @@ class GetTimestamp(Command):
     
     def execute(self, test_env):
         pass
+
+
+class Digest(Command):
+    def __init__(self, values, keys, table_name=None,action_name=None, env=None):
+        self.values=values
+        self.keys=keys
+        self.env = env
+        if table_name is None:
+            self.table_name = "set_digest_or_drop_table_" + UID.get()
+        else:
+            self.table_name=table_name
+
+        if action_name is None:
+            self.action_name = "setter_action_" + UID.get()
+        else:
+            self.action_name = action_name
+
+
+    def check(self):
+        pass
+
+
+    def get_generated_code(self):
+        self.values = [(self.env.get_varinfo(value)["handle"], self.env.get_varinfo(value)["type"]) for value in self.values]
+        gc = GeneratedCode()
+        names = [
+            (name.split(".")[-1] + "_" + str(UID.get()), given_type)
+            for name, given_type, in self.values
+        ]
+        self.digest_name, digest_code = gen_struct(names, "generated_digest")
+        self.digest_metadata_name = f"digest_matadata_{UID.get()}"
+        self.digest_instance_name = "Instance_"+self.digest_name
+        gc.get_or_create("deparser_declaration").writeln(
+            "Digest<{}>() {};".format(self.digest_name, self.digest_instance_name)
+        )
+        gc.get_headers().write(digest_code)
+        gc.get_headers().write('#define DIGEST')
+        gc.get_or_create("metadata").writeln(f"{self.digest_name} {self.digest_metadata_name};")
+        gc.get_or_create("metadata").writeln(f"bool digest;")
+        gc.get_or_create("deparser_apply").writeln("if (meta.digest) {")
+        gc.get_or_create("deparser_apply").increase_indent()
+        gc.get_or_create("deparser_apply").writeln(
+            "{}.pack(meta.{});".format(self.digest_instance_name, self.digest_metadata_name)
+        )
+        gc.get_or_create("deparser_apply").decrease_indent()
+        gc.get_or_create("deparser_apply").writeln("}")
+
+        table_name = self.table_name
+        setter_action= self.action_name 
+
+        decl = gc.get_decl()
+        decl.writeln(f"action {setter_action}() {{")
+        decl.increase_indent()
+        decl.writeln("meta.digest = true;")
+        for i in range(len(self.values)):
+            decl.writeln(f"meta.{self.digest_metadata_name}.{names[i][0]} = {self.values[i][0]};")
+        decl.decrease_indent()
+        decl.writeln("}")
+
+
+        apply = gc.get_apply()
+        match = []
+        for key in self.keys:
+            match.append(self.env.get_varinfo(key))
+        actions = [setter_action, "NoAction"]
+        try:
+            key = [
+                {"name": part_key["handle"], "match_type": "exact"} for part_key in match
+            ]
+        except TypeError:
+            key = [
+                {"name": part_key.get_handle(), "match_type": "exact"} for part_key in match
+            ]
+        size = 256
+        const_entries = []
+        default_action = "NoAction"
+        eval_table = Table(
+            table_name, actions, key, size, const_entries, default_action
+        )
+        gc.concat(eval_table.get_generated_code())
+        apply.writeln("{}.apply();".format(table_name))
+
+
+
+
+
+
+        return gc
